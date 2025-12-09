@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Typing Speed Master</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 900px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .level-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            color: white;
+        }
+
+        .level-number {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .text-display {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            line-height: 1.8;
+            min-height: 120px;
+            border: 3px solid #e0e0e0;
+        }
+
+        .text-display span.correct {
+            color: #28a745;
+            background: #d4edda;
+        }
+
+        .text-display span.incorrect {
+            color: #dc3545;
+            background: #f8d7da;
+        }
+
+        .text-display span.current {
+            border-bottom: 3px solid #667eea;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.3; }
+        }
+
+        .input-area {
+            margin-bottom: 20px;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2em;
+            border: 3px solid #667eea;
+            border-radius: 10px;
+            resize: vertical;
+            font-family: 'Courier New', monospace;
+            min-height: 100px;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #764ba2;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea:disabled {
+            background: #f0f0f0;
+            cursor: not-allowed;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .reset-btn {
+            background: #6c757d;
+            color: white;
+        }
+
+        .reset-btn:hover {
+            background: #5a6268;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .results {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            padding: 30px;
+            border-radius: 10px;
+            color: white;
+            display: none;
+        }
+
+        .results.show {
+            display: block;
+            animation: slideIn 0.5s;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .results h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .result-item {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .result-item h3 {
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+
+        .result-item p {
+            font-size: 1em;
+            opacity: 0.9;
+        }
+
+        .rating {
+            text-align: center;
+            font-size: 1.5em;
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+
+        .rating-emoji {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .next-level-btn {
+            background: white;
+            color: #11998e;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .next-level-btn:hover {
+            background: #f0f0f0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #11998e 0%, #38ef7d 100%);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .level-complete {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .instructions {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⌨️ Typing Speed Master</h1>
+        <p class="subtitle">Test your typing skills across 5 challenging levels!</p>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <div class="level-info">
+            <div class="level-number">Level <span id="currentLevel">1</span>/5</div>
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-value" id="timer">0</div>
+                    <div class="stat-label">Seconds</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="wpm">0</div>
+                    <div class="stat-label">WPM</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="accuracy">100</div>
+                    <div class="stat-label">Accuracy %</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="level-complete" id="levelComplete">
+            🎉 Level Complete! Ready for the next challenge?
+        </div>
+
+        <div class="instructions" id="instructions">
+            Click "Start Level" to begin. Type the text exactly as shown above!
+        </div>
+
+        <div class="text-display" id="textDisplay"></div>
+
+        <div class="input-area">
+            <textarea id="inputText" placeholder="Click 'Start Level' to begin typing..." disabled></textarea>
+        </div>
+
+        <div class="controls">
+            <button class="start-btn" id="startBtn">Start Level</button>
+            <button class="reset-btn" id="resetBtn">Reset</button>
+        </div>
+
+        <div class="results" id="results">
+            <h2>🏆 Level Results</h2>
+            <div class="results-grid">
+                <div class="result-item">
+                    <h3 id="finalWpm">0</h3>
+                    <p>Words Per Minute</p>
+                </div>
+                <div class="result-item">
+                    <h3 id="finalAccuracy">0</h3>
+                    <p>Accuracy</p>
+                </div>
+                <div class="result-item">
+                    <h3 id="finalTime">0</h3>
+                    <p>Time (seconds)</p>
+                </div>
+                <div class="result-item">
+                    <h3 id="finalErrors">0</h3>
+                    <p>Errors</p>
+                </div>
+            </div>
+            <div class="rating" id="ratingText">
+                <div class="rating-emoji" id="ratingEmoji"></div>
+                <div id="ratingMessage"></div>
+            </div>
+            <button class="start-btn next-level-btn" id="nextLevelBtn">Next Level →</button>
+        </div>
+    </div>
+
+    <script>
+        const texts = [
+            "The quick brown fox jumps over the lazy dog.",
+            "Practice makes perfect when you type every day with focus and determination.",
+            "Technology has revolutionized the way we communicate, work, and learn in modern society.",
+            "The art of typing quickly requires patience, practice, and proper finger placement on the keyboard.",
+            "In today's digital age, efficient typing skills are essential for productivity and success in many careers."
+        ];
+
+        let currentLevel = 1;
+        let startTime, endTime;
+        let timerInterval;
+        let isPlaying = false;
+        let currentText = "";
+        let totalErrors = 0;
+
+        const textDisplay = document.getElementById('textDisplay');
+        const inputText = document.getElementById('inputText');
+        const startBtn = document.getElementById('startBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const nextLevelBtn = document.getElementById('nextLevelBtn');
+        const results = document.getElementById('results');
+        const instructions = document.getElementById('instructions');
+        const levelComplete = document.getElementById('levelComplete');
+
+        function initLevel() {
+            currentText = texts[currentLevel - 1];
+            textDisplay.innerHTML = currentText.split('').map((char, i) => 
+                `<span id="char${i}">${char}</span>`
+            ).join('');
+            inputText.value = '';
+            inputText.disabled = true;
+            totalErrors = 0;
+            updateStats(0, 0, 100);
+            results.classList.remove('show');
+            levelComplete.style.display = 'none';
+            instructions.style.display = 'block';
+            document.getElementById('currentLevel').textContent = currentLevel;
+            updateProgressBar();
+        }
+
+        function updateProgressBar() {
+            const progress = (currentLevel / 5) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+        }
+
+        function startLevel() {
+            if (isPlaying) return;
+            isPlaying = true;
+            startTime = Date.now();
+            inputText.disabled = false;
+            inputText.focus();
+            startBtn.disabled = true;
+            instructions.style.display = 'none';
+            
+            timerInterval = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                document.getElementById('timer').textContent = elapsed;
+            }, 100);
+        }
+
+        function updateStats(wpm, accuracy, errors) {
+            document.getElementById('wpm').textContent = Math.round(wpm);
+            document.getElementById('accuracy').textContent = Math.round(accuracy);
+        }
+
+        function calculateWPM(chars, seconds) {
+            const words = chars / 5;
+            const minutes = seconds / 60;
+            return minutes > 0 ? words / minutes : 0;
+        }
+
+        function getRating(wpm, accuracy) {
+            if (accuracy < 70) {
+                return {
+                    emoji: "😟",
+                    message: "Focus on accuracy! Slow down and type carefully.",
+                    color: "#dc3545"
+                };
+            } else if (wpm < 20) {
+                return {
+                    emoji: "🐌",
+                    message: "Beginner - Keep practicing! Speed will come with time.",
+                    color: "#ffc107"
+                };
+            } else if (wpm < 40) {
+                return {
+                    emoji: "🚶",
+                    message: "Average - You're making good progress!",
+                    color: "#17a2b8"
+                };
+            } else if (wpm < 60) {
+                return {
+                    emoji: "🏃",
+                    message: "Good - Above average typing speed!",
+                    color: "#28a745"
+                };
+            } else if (wpm < 80) {
+                return {
+                    emoji: "🚀",
+                    message: "Excellent - You're a fast typer!",
+                    color: "#007bff"
+                };
+            } else if (wpm < 100) {
+                return {
+                    emoji: "⚡",
+                    message: "Outstanding - Professional level typing!",
+                    color: "#6f42c1"
+                };
+            } else {
+                return {
+                    emoji: "👑",
+                    message: "Master - Elite typing speed! Incredible!",
+                    color: "#fd7e14"
+                };
+            }
+        }
+
+        function endLevel() {
+            if (!isPlaying) return;
+            isPlaying = false;
+            clearInterval(timerInterval);
+            endTime = Date.now();
+            startBtn.disabled = false;
+            inputText.disabled = true;
+
+            const timeInSeconds = (endTime - startTime) / 1000;
+            const wpm = calculateWPM(currentText.length, timeInSeconds);
+            const accuracy = ((currentText.length - totalErrors) / currentText.length) * 100;
+
+            document.getElementById('finalWpm').textContent = Math.round(wpm);
+            document.getElementById('finalAccuracy').textContent = Math.round(accuracy) + '%';
+            document.getElementById('finalTime').textContent = timeInSeconds.toFixed(2);
+            document.getElementById('finalErrors').textContent = totalErrors;
+
+            const rating = getRating(wpm, accuracy);
+            document.getElementById('ratingEmoji').textContent = rating.emoji;
+            document.getElementById('ratingMessage').innerHTML = `<strong>${rating.message}</strong>`;
+            document.getElementById('ratingText').style.background = `linear-gradient(135deg, ${rating.color} 0%, ${rating.color}dd 100%)`;
+
+            results.classList.add('show');
+            levelComplete.style.display = 'block';
+
+            if (currentLevel >= 5) {
+                nextLevelBtn.textContent = '🎉 Complete! Start Over';
+            } else {
+                nextLevelBtn.textContent = 'Next Level →';
+            }
+        }
+
+        inputText.addEventListener('input', (e) => {
+            if (!isPlaying) return;
+
+            const typed = e.target.value;
+            const chars = currentText.split('');
+            let correct = 0;
+            totalErrors = 0;
+
+            chars.forEach((char, index) => {
+                const span = document.getElementById(`char${index}`);
+                span.classList.remove('correct', 'incorrect', 'current');
+
+                if (index < typed.length) {
+                    if (typed[index] === char) {
+                        span.classList.add('correct');
+                        correct++;
+                    } else {
+                        span.classList.add('incorrect');
+                        totalErrors++;
+                    }
+                } else if (index === typed.length) {
+                    span.classList.add('current');
+                }
+            });
+
+            const accuracy = typed.length > 0 ? (correct / typed.length) * 100 : 100;
+            const elapsed = (Date.now() - startTime) / 1000;
+            const wpm = calculateWPM(typed.length, elapsed);
+            
+            updateStats(wpm, accuracy, totalErrors);
+
+            if (typed === currentText) {
+                endLevel();
+            }
+        });
+
+        startBtn.addEventListener('click', startLevel);
+
+        resetBtn.addEventListener('click', () => {
+            clearInterval(timerInterval);
+            isPlaying = false;
+            startBtn.disabled = false;
+            initLevel();
+        });
+
+        nextLevelBtn.addEventListener('click', () => {
+            if (currentLevel >= 5) {
+                currentLevel = 1;
+            } else {
+                currentLevel++;
+            }
+            initLevel();
+        });
+
+        initLevel();
+    </script>
+</body>
+</html>
