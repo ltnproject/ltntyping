@@ -1,568 +1,271 @@
-import React, { useState, useEffect, useRef } from 'react';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Type Master Pro</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="text-white">
+<div id="app"></div>
+
+<script>
+/* ===================== SENTENCES ===================== */
 const SENTENCES = [
   "The quick brown fox jumps over the lazy dog near the riverbank.",
   "She sells seashells by the seashore while watching the sunset.",
   "A journey of a thousand miles begins with a single step forward.",
   "Life is what happens when you're busy making other plans.",
   "The early bird catches the worm but the second mouse gets the cheese.",
-  "Practice makes perfect but nobody's perfect so why practice at all?",
-  "Time flies like an arrow but fruit flies like a banana instead.",
-  "To be or not to be, that is the question we must answer.",
-  "All that glitters is not gold, and not all who wander are lost.",
+  "Practice makes perfect but nobody's perfect so why practice at all.",
+  "Time flies like an arrow but fruit flies like a banana.",
+  "To be or not to be that is the question we must answer.",
+  "All that glitters is not gold and not all who wander are lost.",
   "The pen is mightier than the sword in the hands of a writer.",
   "Knowledge is power but enthusiasm pulls the switch that turns it on.",
-  "Success is not final and failure is not fatal, courage continues on.",
+  "Success is not final and failure is not fatal courage continues.",
   "The only way to do great work is to love what you do.",
   "In the middle of difficulty lies opportunity waiting to be found.",
-  "The future belongs to those who believe in the beauty of their dreams.",
-  "Yesterday is history, tomorrow is a mystery, but today is a gift.",
-  "Happiness is not something ready made, it comes from your own actions.",
-  "The best time to plant a tree was twenty years ago.",
-  "Change your thoughts and you change your world for the better.",
-  "The greatest glory in living lies not in never falling but rising.",
+  "The future belongs to those who believe in the beauty of dreams.",
+  "Yesterday is history tomorrow is a mystery but today is a gift.",
+  "Happiness comes from your own actions not from outside sources.",
+  "Typing fast requires focus rhythm and consistent practice.",
+  "Accuracy matters more than speed when learning to type properly.",
+  "Touch typing allows you to type without looking at the keyboard.",
+  "Practice every day to build muscle memory in your fingers.",
+  "Typing tests are a fun way to track improvement over time.",
+  "Consistency beats talent when talent does not practice.",
+  "Typing speed improves naturally with patience and repetition.",
+  "Small improvements each day lead to massive progress later.",
+  "A calm mind leads to cleaner keystrokes and fewer mistakes.",
+  "The keyboard becomes an extension of your hands with practice.",
+  "Good posture helps improve typing speed and accuracy.",
+  "Looking at the screen instead of the keyboard saves time.",
+  "Typing with confidence reduces unnecessary corrections.",
+  "Slow typing today leads to fast typing tomorrow.",
+  "Speed comes after accuracy not before.",
+  "The best typists focus on rhythm rather than rushing.",
+  "Mistakes are part of the learning process.",
+  "Fast typing feels effortless after enough repetition.",
+  "Training your fingers is like training muscles.",
+  "Typing challenges help build endurance over time.",
+  "Focus improves speed more than trying to go fast.",
+  "Typing without fear improves consistency.",
+  "Short breaks can improve long typing sessions.",
+  "Confidence grows as mistakes decrease.",
+  "Learning to type well helps in every subject.",
+  "Typing skill is useful for school and future work.",
+  "Daily practice makes typing feel natural.",
+  "Each sentence typed builds experience.",
+  "Typing is a skill anyone can master.",
+  "Fast typing saves time on homework and projects.",
+  "Strong typing skills boost productivity.",
+  "Typing smoothly feels satisfying and calm.",
+  "Speed tests are fun challenges not pressure.",
+  "Improving typing builds self confidence.",
+  "Good habits lead to long term improvement.",
+  "Typing speed is built one sentence at a time."
 ];
 
-export default function TypingTest() {
-  const [mode, setMode] = useState('menu'); // menu, typing, clicking
-  const [currentSentence, setCurrentSentence] = useState('');
-  const [userInput, setUserInput] = useState('');
-  const [startTime, setStartTime] = useState(null);
-  const [isActive, setIsActive] = useState(false);
-  const [isFinished, setIsFinished] = useState(false);
-  const [wpm, setWpm] = useState(0);
-  const [accuracy, setAccuracy] = useState(100);
-  const [errors, setErrors] = useState(0);
-  
-  // Click test states
-  const [clicks, setClicks] = useState(0);
-  const [clickTimeLeft, setClickTimeLeft] = useState(15);
-  const [clickTestActive, setClickTestActive] = useState(false);
-  const [clickTestFinished, setClickTestFinished] = useState(false);
-  const [cps, setCps] = useState(0);
-  
-  const inputRef = useRef(null);
+/* ===================== STATE ===================== */
+let mode = "menu";
+let currentSentence = "";
+let userInput = "";
+let startTime = null;
+let isActive = false;
+let isFinished = false;
+let wpm = 0;
+let accuracy = 100;
+let errors = 0;
 
-  useEffect(() => {
-    if (mode === 'typing') {
-      getNewSentence();
-      inputRef.current?.focus();
-    }
-  }, [mode]);
+let clicks = 0;
+let clickTimeLeft = 15;
+let clickActive = false;
+let clickFinished = false;
+let cps = 0;
+let clickTimer;
 
-  useEffect(() => {
-    if (clickTestActive && clickTimeLeft > 0) {
-      const timer = setTimeout(() => setClickTimeLeft(clickTimeLeft - 1), 1000);
-      return () => clearTimeout(timer);
-    } else if (clickTimeLeft === 0 && clickTestActive) {
-      finishClickTest();
-    }
-  }, [clickTimeLeft, clickTestActive]);
+/* ===================== FUNCTIONS ===================== */
+function randomSentence() {
+  currentSentence = SENTENCES[Math.floor(Math.random() * SENTENCES.length)];
+}
 
-  const getNewSentence = () => {
-    const randomSentence = SENTENCES[Math.floor(Math.random() * SENTENCES.length)];
-    setCurrentSentence(randomSentence);
-  };
+function backToMenu() {
+  resetTyping();
+  resetClick();
+  mode = "menu";
+  render();
+}
 
-  const handleInput = (e) => {
-    const value = e.target.value;
-
-    if (!isActive && value.length > 0) {
-      setIsActive(true);
-      setStartTime(Date.now());
-    }
-
-    setUserInput(value);
-
-    if (value === currentSentence) {
-      finishTypingTest();
-    }
-  };
-
-  const finishTypingTest = () => {
-    setIsActive(false);
-    setIsFinished(true);
-
-    const timeInMinutes = (Date.now() - startTime) / 1000 / 60;
-    const wordsTyped = currentSentence.split(' ').length;
-    const calculatedWpm = Math.round(wordsTyped / timeInMinutes);
-
-    let errorCount = 0;
-    for (let i = 0; i < userInput.length; i++) {
-      if (userInput[i] !== currentSentence[i]) {
-        errorCount++;
-      }
-    }
-
-    const calculatedAccuracy = Math.round(((currentSentence.length - errorCount) / currentSentence.length) * 100);
-
-    setWpm(calculatedWpm);
-    setAccuracy(calculatedAccuracy);
-    setErrors(errorCount);
-  };
-
-  const restartTyping = () => {
-    setUserInput('');
-    setStartTime(null);
-    setIsActive(false);
-    setIsFinished(false);
-    setWpm(0);
-    setAccuracy(100);
-    setErrors(0);
-    getNewSentence();
-    inputRef.current?.focus();
-  };
-
-  const getCharStatus = (index) => {
-    if (index >= userInput.length) return 'text-gray-500';
-    if (userInput[index] === currentSentence[index]) return 'text-green-400';
-    return 'text-red-500 bg-red-900/20';
-  };
-
-  // Click test functions
-  const startClickTest = () => {
-    setClickTestActive(true);
-    setClicks(0);
-    setClickTimeLeft(15);
-    setClickTestFinished(false);
-  };
-
-  const handleClick = () => {
-    if (clickTestActive) {
-      setClicks(clicks + 1);
-    }
-  };
-
-  const finishClickTest = () => {
-    setClickTestActive(false);
-    setClickTestFinished(true);
-    setCps((clicks / 15).toFixed(2));
-  };
-
-  const restartClickTest = () => {
-    setClicks(0);
-    setClickTimeLeft(15);
-    setClickTestActive(false);
-    setClickTestFinished(false);
-    setCps(0);
-  };
-
-  const backToMenu = () => {
-    setMode('menu');
-    restartTyping();
-    restartClickTest();
-  };
-
-  if (mode === 'menu') {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-gray-900 to-indigo-900 text-white flex flex-col">
-        <div className="flex-1 flex items-center justify-center p-8">
-          <div className="max-w-4xl w-full">
-            <div className="text-center mb-8">
-              <a 
-                href="https://ltnproject.github.io/dashboard/" 
-                className="inline-flex items-center gap-2 px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-xl transition-colors font-semibold mb-6"
-              >
-                🔙 To Dashboard
-              </a>
-              <h1 className="text-7xl font-bold mb-4 bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 bg-clip-text text-transparent">
-                Type Master Pro
-              </h1>
-              <p className="text-gray-400 text-xl">Choose your challenge</p>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-6 mb-8">
-              {/* Typing Test Card */}
-              <div 
-                onClick={() => setMode('typing')}
-                className="bg-gray-800/50 backdrop-blur-lg rounded-3xl p-8 border-2 border-purple-500/30 hover:border-purple-500/60 transition-all cursor-pointer transform hover:scale-105 shadow-2xl"
-              >
-                <div className="text-6xl mb-4">⌨️</div>
-                <h2 className="text-3xl font-bold mb-3 text-purple-300">Typing Speed Test</h2>
-                <p className="text-gray-400 mb-4">Type complete sentences and measure your WPM, accuracy, and errors</p>
-                <div className="flex flex-wrap gap-2">
-                  <span className="px-3 py-1 bg-purple-500/20 rounded-full text-sm">Speed (WPM)</span>
-                  <span className="px-3 py-1 bg-blue-500/20 rounded-full text-sm">Accuracy</span>
-                  <span className="px-3 py-1 bg-pink-500/20 rounded-full text-sm">Error Count</span>
-                </div>
-              </div>
-
-              {/* Click Speed Card */}
-              <div 
-                onClick={() => setMode('clicking')}
-                className="bg-gray-800/50 backdrop-blur-lg rounded-3xl p-8 border-2 border-pink-500/30 hover:border-pink-500/60 transition-all cursor-pointer transform hover:scale-105 shadow-2xl"
-              >
-                <div className="text-6xl mb-4">🖱️</div>
-                <h2 className="text-3xl font-bold mb-3 text-pink-300">Click Speed Test</h2>
-                <p className="text-gray-400 mb-4">Test how many clicks you can do in 15 seconds</p>
-                <div className="flex flex-wrap gap-2">
-                  <span className="px-3 py-1 bg-pink-500/20 rounded-full text-sm">15 Seconds</span>
-                  <span className="px-3 py-1 bg-red-500/20 rounded-full text-sm">Click Counter</span>
-                  <span className="px-3 py-1 bg-orange-500/20 rounded-full text-sm">CPS Rate</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Stats Info */}
-            <div className="bg-gray-800/30 backdrop-blur-lg rounded-2xl p-6 border border-purple-500/20">
-              <h3 className="text-xl font-bold mb-4 text-purple-300">📊 What You'll Learn</h3>
-              <div className="grid md:grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span className="font-semibold text-green-400">Typing Test:</span>
-                  <ul className="ml-4 mt-2 text-gray-400 space-y-1">
-                    <li>• Words Per Minute (WPM)</li>
-                    <li>• Typing accuracy percentage</li>
-                    <li>• Number of errors made</li>
-                    <li>• Real-time progress tracking</li>
-                  </ul>
-                </div>
-                <div>
-                  <span className="font-semibold text-pink-400">Click Test:</span>
-                  <ul className="ml-4 mt-2 text-gray-400 space-y-1">
-                    <li>• Total clicks in 15 seconds</li>
-                    <li>• Clicks Per Second (CPS)</li>
-                    <li>• Mouse speed ranking</li>
-                    <li>• Beat your high score</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <footer className="bg-gray-900/50 backdrop-blur-lg border-t border-purple-500/20 py-6">
-          <div className="max-w-6xl mx-auto px-8">
-            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-              <div className="text-center md:text-left">
-                <h3 className="text-xl font-bold text-purple-300 mb-2">Ltn Project Dashboard</h3>
-                <p className="text-gray-400 text-sm">© 2025 Ltn Project by Jacob</p>
-              </div>
-              
-              <div className="flex flex-col md:flex-row gap-6 text-sm">
-                <div>
-                  <p className="text-gray-400 mb-1">📞 <span className="font-semibold text-purple-300">Contact Us:</span></p>
-                  <p className="text-gray-300">Gmail: ltnprojectbyjacob@gmail.com</p>
-                  <p className="text-gray-300">L-Connect: ltnprojectbyjacob@gmail.com</p>
-                </div>
-                <div>
-                  <p className="text-gray-400 mb-1">▶️ <span className="font-semibold text-pink-300">YouTube:</span></p>
-                  <a 
-                    href="https://www.youtube.com/@LtnRBLX" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-blue-400 hover:text-blue-300 underline"
-                  >
-                    www.youtube.com/@LtnRBLX
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </footer>
-      </div>
-    );
+function handleTyping(e) {
+  if (!isActive && e.target.value.length > 0) {
+    startTime = Date.now();
+    isActive = true;
   }
 
-  if (mode === 'clicking') {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-900 via-gray-900 to-red-900 text-white flex flex-col">
-        <div className="flex-1 flex items-center justify-center p-8">
-          <div className="max-w-4xl w-full">
-            <div className="text-center mb-12">
-              <h1 className="text-6xl font-bold mb-3 bg-gradient-to-r from-pink-400 via-red-400 to-orange-400 bg-clip-text text-transparent">
-                Click Speed Test 🖱️
-              </h1>
-              <p className="text-gray-400 text-lg">How fast can you click?</p>
-            </div>
+  userInput = e.target.value;
+  if (userInput === currentSentence) finishTyping();
+  render();
+}
 
-            {!clickTestActive && !clickTestFinished && (
-              <div className="text-center">
-                <button
-                  onClick={startClickTest}
-                  className="px-12 py-6 bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 rounded-2xl font-bold text-2xl transition-all transform hover:scale-110 shadow-2xl"
-                >
-                  Start Click Test
-                </button>
-                <p className="text-gray-400 mt-6">Click the button as fast as you can for 15 seconds!</p>
-              </div>
-            )}
+function finishTyping() {
+  isActive = false;
+  isFinished = true;
 
-            {clickTestActive && (
-              <div className="bg-gray-800/50 backdrop-blur-lg rounded-3xl p-12 border-2 border-pink-500/30 shadow-2xl text-center">
-                <div className="text-8xl font-bold text-pink-400 mb-6">{clickTimeLeft}</div>
-                <div className="text-2xl text-gray-400 mb-8">seconds left</div>
-                
-                <button
-                  onClick={handleClick}
-                  className="w-64 h-64 bg-gradient-to-br from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 rounded-full font-bold text-4xl transition-all transform hover:scale-95 active:scale-90 shadow-2xl mx-auto flex items-center justify-center"
-                >
-                  CLICK!
-                </button>
-                
-                <div className="text-6xl font-bold text-white mt-8">{clicks}</div>
-                <div className="text-gray-400 mt-2">clicks</div>
-              </div>
-            )}
+  const timeMin = (Date.now() - startTime) / 60000;
+  const words = currentSentence.split(" ").length;
+  wpm = Math.round(words / timeMin);
 
-            {clickTestFinished && (
-              <div className="bg-gray-800/50 backdrop-blur-lg rounded-3xl p-10 border-2 border-pink-500/30 shadow-2xl">
-                <h2 className="text-3xl font-bold text-center mb-8 text-pink-300">Test Complete! 🎉</h2>
-                <div className="grid grid-cols-2 gap-8 mb-8">
-                  <div className="text-center">
-                    <div className="text-gray-400 text-sm uppercase tracking-wider mb-2">Total Clicks</div>
-                    <div className="text-7xl font-bold bg-gradient-to-r from-pink-400 to-red-400 bg-clip-text text-transparent">
-                      {clicks}
-                    </div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-gray-400 text-sm uppercase tracking-wider mb-2">Clicks Per Second</div>
-                    <div className="text-7xl font-bold bg-gradient-to-r from-orange-400 to-yellow-400 bg-clip-text text-transparent">
-                      {cps}
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="bg-gray-900/50 rounded-xl p-4 mb-6">
-                  <p className="text-center text-lg font-bold">
-                    {clicks < 30 ? '🐌 Beginner - Keep practicing!' : 
-                     clicks < 50 ? '😊 Decent - Not bad!' : 
-                     clicks < 70 ? '👍 Good - Nice work!' : 
-                     clicks < 90 ? '🔥 Great - Impressive!' : 
-                     clicks < 110 ? '⚡ Excellent - Amazing!' : 
-                     '🏆 LEGENDARY - You\'re a beast!'}
-                  </p>
-                  <p className="text-center text-sm text-gray-400 mt-2">
-                    {clicks < 30 ? 'Try using multiple fingers!' : 
-                     clicks < 50 ? 'You\'re getting there!' : 
-                     clicks < 70 ? 'Above average performance!' : 
-                     clicks < 90 ? 'You\'re really fast!' : 
-                     clicks < 110 ? 'Professional level!' : 
-                     'Are you even human?!'}
-                  </p>
-                </div>
-
-                <button
-                  onClick={restartClickTest}
-                  className="w-full py-4 bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 rounded-xl font-bold text-lg transition-all transform hover:scale-105 shadow-lg"
-                >
-                  Try Again
-                </button>
-              </div>
-            )}
-
-            <div className="text-center mt-8">
-              <button
-                onClick={backToMenu}
-                className="px-8 py-3 bg-gray-700 hover:bg-gray-600 rounded-xl transition-colors font-semibold"
-              >
-                🔙 Back to Menu
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <footer className="bg-gray-900/50 backdrop-blur-lg border-t border-pink-500/20 py-6">
-          <div className="max-w-6xl mx-auto px-8">
-            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-              <div className="text-center md:text-left">
-                <h3 className="text-xl font-bold text-pink-300 mb-2">Ltn Project Dashboard</h3>
-                <p className="text-gray-400 text-sm">© 2025 Ltn Project by Jacob</p>
-              </div>
-              
-              <div className="flex flex-col md:flex-row gap-6 text-sm">
-                <div>
-                  <p className="text-gray-400 mb-1">📞 <span className="font-semibold text-pink-300">Contact Us:</span></p>
-                  <p className="text-gray-300">Gmail: ltnprojectbyjacob@gmail.com</p>
-                  <p className="text-gray-300">L-Connect: ltnprojectbyjacob@gmail.com</p>
-                </div>
-                <div>
-                  <p className="text-gray-400 mb-1">▶️ <span className="font-semibold text-pink-300">YouTube:</span></p>
-                  <a 
-                    href="https://www.youtube.com/@LtnRBLX" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-blue-400 hover:text-blue-300 underline"
-                  >
-                    www.youtube.com/@LtnRBLX
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </footer>
-      </div>
-    );
+  errors = 0;
+  for (let i = 0; i < userInput.length; i++) {
+    if (userInput[i] !== currentSentence[i]) errors++;
   }
 
-  // Typing test mode
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-gray-900 to-indigo-900 text-white flex flex-col">
-      <div className="flex-1 flex items-center justify-center p-8">
-        <div className="max-w-4xl w-full">
-          <div className="text-center mb-12">
-            <h1 className="text-6xl font-bold mb-3 bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 bg-clip-text text-transparent">
-              Typing Speed Test ⌨️
-            </h1>
-            <p className="text-gray-400 text-lg">
-              Words to type: <span className="text-purple-400 font-bold">{currentSentence.split(' ').length}</span>
-            </p>
-          </div>
+  accuracy = Math.round(((currentSentence.length - errors) / currentSentence.length) * 100);
+}
 
-          {isFinished && (
-            <div className="bg-gray-800/50 backdrop-blur-lg rounded-3xl p-10 mb-8 border-2 border-purple-500/30 shadow-2xl">
-              <h2 className="text-3xl font-bold text-center mb-8 text-purple-300">Test Complete! 🎉</h2>
-              <div className="grid grid-cols-3 gap-8 mb-8">
-                <div className="text-center">
-                  <div className="text-gray-400 text-sm uppercase tracking-wider mb-2">Speed</div>
-                  <div className="text-6xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
-                    {wpm}
-                  </div>
-                  <div className="text-gray-500 text-sm mt-1">WPM</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-gray-400 text-sm uppercase tracking-wider mb-2">Accuracy</div>
-                  <div className="text-6xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-                    {accuracy}
-                  </div>
-                  <div className="text-gray-500 text-sm mt-1">%</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-gray-400 text-sm uppercase tracking-wider mb-2">Errors</div>
-                  <div className="text-6xl font-bold bg-gradient-to-r from-red-400 to-orange-400 bg-clip-text text-transparent">
-                    {errors}
-                  </div>
-                  <div className="text-gray-500 text-sm mt-1">mistakes</div>
-                </div>
-              </div>
-              
-              <div className="bg-gray-900/50 rounded-xl p-4 mb-6">
-                <p className="text-center text-lg font-bold">
-                  {wpm < 20 ? '🐌 Beginner - Keep practicing!' : 
-                   wpm < 40 ? '😊 Average - Getting better!' : 
-                   wpm < 60 ? '👍 Good - Nice typing!' : 
-                   wpm < 80 ? '🔥 Fast - Great speed!' : 
-                   wpm < 100 ? '⚡ Excellent - Very impressive!' : 
-                   '🏆 LEGENDARY - Pro typist!'}
-                </p>
-                <p className="text-center text-sm text-gray-400 mt-2">
-                  {wpm < 20 ? 'Take your time and focus on accuracy' : 
-                   wpm < 40 ? 'You\'re improving steadily!' : 
-                   wpm < 60 ? 'Above average typing speed!' : 
-                   wpm < 80 ? 'Professional typing level!' : 
-                   wpm < 100 ? 'Elite tier performance!' : 
-                   'You type faster than most people!'}
-                </p>
-              </div>
-              <button
-                onClick={restartTyping}
-                className="w-full py-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-xl font-bold text-lg transition-all transform hover:scale-105 shadow-lg"
-              >
-                Try Another Sentence
-              </button>
-            </div>
-          )}
+function resetTyping() {
+  userInput = "";
+  isActive = false;
+  isFinished = false;
+  startTime = null;
+  wpm = 0;
+  accuracy = 100;
+  errors = 0;
+  randomSentence();
+}
 
-          {!isFinished && (
-            <div 
-              className="bg-gray-800/50 backdrop-blur-lg rounded-3xl p-10 mb-8 border-2 border-purple-500/30 shadow-2xl min-h-[200px] flex items-center select-none"
-              onCopy={(e) => e.preventDefault()}
-              onCut={(e) => e.preventDefault()}
-              onPaste={(e) => e.preventDefault()}
-              onDragStart={(e) => e.preventDefault()}
-            >
-              <div className="text-4xl leading-relaxed font-medium w-full pointer-events-none">
-                {currentSentence.split('').map((char, index) => (
-                  <span
-                    key={index}
-                    className={`${getCharStatus(index)} transition-colors duration-100`}
-                  >
-                    {char}
-                    {index === userInput.length && (
-                      <span className="inline-block w-1 h-10 bg-purple-400 animate-pulse ml-0.5 align-middle" />
-                    )}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
+function startClickTest() {
+  clicks = 0;
+  clickTimeLeft = 15;
+  clickActive = true;
+  clickFinished = false;
 
-          {!isFinished && (
-            <div className="mb-6">
-              <textarea
-                ref={inputRef}
-                value={userInput}
-                onChange={handleInput}
-                onPaste={(e) => e.preventDefault()}
-                onCopy={(e) => e.preventDefault()}
-                onCut={(e) => e.preventDefault()}
-                className="w-full bg-gray-800/70 backdrop-blur-lg text-2xl p-6 rounded-2xl border-2 border-purple-500/50 focus:border-purple-400 focus:outline-none resize-none h-32 text-gray-200 placeholder-gray-500 shadow-xl"
-                placeholder="Start typing the sentence above..."
-                autoComplete="off"
-                autoCapitalize="off"
-                autoCorrect="off"
-                spellCheck="false"
-              />
-            </div>
-          )}
+  clickTimer = setInterval(() => {
+    clickTimeLeft--;
+    if (clickTimeLeft <= 0) finishClickTest();
+    render();
+  }, 1000);
+}
 
-          {isActive && (
-            <div className="flex justify-center gap-8 text-center mb-6">
-              <div>
-                <div className="text-gray-500 text-sm">Time</div>
-                <div className="text-2xl font-bold text-purple-400">
-                  {Math.floor((Date.now() - startTime) / 1000)}s
-                </div>
-              </div>
-              <div>
-                <div className="text-gray-500 text-sm">Progress</div>
-                <div className="text-2xl font-bold text-pink-400">
-                  {Math.round((userInput.length / currentSentence.length) * 100)}%
-                </div>
-              </div>
-            </div>
-          )}
+function handleClick() {
+  if (clickActive) clicks++;
+  render();
+}
 
-          <div className="text-center">
-            <button
-              onClick={backToMenu}
-              className="px-8 py-3 bg-gray-700 hover:bg-gray-600 rounded-xl transition-colors font-semibold"
-            >
-              🔙 Back to Menu
+function finishClickTest() {
+  clearInterval(clickTimer);
+  clickActive = false;
+  clickFinished = true;
+  cps = (clicks / 15).toFixed(2);
+}
+
+function resetClick() {
+  clicks = 0;
+  clickTimeLeft = 15;
+  clickActive = false;
+  clickFinished = false;
+  cps = 0;
+}
+
+/* ===================== RENDER ===================== */
+function render() {
+  const app = document.getElementById("app");
+
+  if (mode === "menu") {
+    app.innerHTML = `
+      <div class="min-h-screen bg-gradient-to-br from-purple-900 via-gray-900 to-indigo-900 flex items-center justify-center">
+        <div class="text-center">
+          <h1 class="text-7xl font-bold mb-6 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+            Type Master Pro
+          </h1>
+          <div class="flex gap-6 justify-center">
+            <button onclick="mode='typing'; resetTyping(); render()"
+              class="px-8 py-4 bg-purple-600 rounded-xl font-bold">
+              ⌨️ Typing Test
+            </button>
+            <button onclick="mode='clicking'; render()"
+              class="px-8 py-4 bg-pink-600 rounded-xl font-bold">
+              🖱️ Click Test
             </button>
           </div>
         </div>
       </div>
+    `;
+    return;
+  }
 
-      <footer className="bg-gray-900/50 backdrop-blur-lg border-t border-purple-500/20 py-6">
-        <div className="max-w-6xl mx-auto px-8">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="text-center md:text-left">
-              <h3 className="text-xl font-bold text-purple-300 mb-2">Ltn Project Dashboard</h3>
-              <p className="text-gray-400 text-sm">© 2025 Ltn Project by Jacob</p>
+  if (mode === "clicking") {
+    app.innerHTML = `
+      <div class="min-h-screen bg-gradient-to-br from-pink-900 to-red-900 flex items-center justify-center">
+        <div class="text-center">
+          ${!clickActive && !clickFinished ? `
+            <button onclick="startClickTest()" class="px-12 py-6 bg-pink-600 rounded-xl text-2xl font-bold">
+              Start Click Test
+            </button>
+          ` : ""}
+          ${clickActive ? `
+            <div>
+              <div class="text-7xl">${clickTimeLeft}</div>
+              <button onclick="handleClick()" class="w-64 h-64 rounded-full bg-red-500 text-4xl font-bold">
+                CLICK
+              </button>
+              <div class="text-5xl mt-4">${clicks}</div>
             </div>
-            
-            <div className="flex flex-col md:flex-row gap-6 text-sm">
-              <div>
-                <p className="text-gray-400 mb-1">📞 <span className="font-semibold text-purple-300">Contact Us:</span></p>
-                <p className="text-gray-300">Gmail: ltnprojectbyjacob@gmail.com</p>
-                <p className="text-gray-300">L-Connect: ltnprojectbyjacob@gmail.com</p>
-              </div>
-              <div>
-                <p className="text-gray-400 mb-1">▶️ <span className="font-semibold text-pink-300">YouTube:</span></p>
-                <a 
-                  href="https://www.youtube.com/@LtnRBLX" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-blue-400 hover:text-blue-300 underline"
-                >
-                  www.youtube.com/@LtnRBLX
-                </a>
-              </div>
-            </div>
+          ` : ""}
+          ${clickFinished ? `
+            <div class="text-4xl">Clicks: ${clicks}<br>CPS: ${cps}</div>
+          ` : ""}
+          <div class="mt-6">
+            <button onclick="backToMenu()" class="px-6 py-3 bg-gray-700 rounded-xl">🔙 Back</button>
           </div>
         </div>
-      </footer>
+      </div>
+    `;
+    return;
+  }
+
+  app.innerHTML = `
+    <div class="min-h-screen bg-gradient-to-br from-purple-900 via-gray-900 to-indigo-900 flex items-center justify-center p-8">
+      <div class="max-w-4xl w-full">
+        <div class="bg-gray-800 p-8 rounded-3xl text-3xl mb-6">
+          ${currentSentence.split("").map((c, i) => {
+            let color = "text-gray-500";
+            if (i < userInput.length)
+              color = userInput[i] === c ? "text-green-400" : "text-red-500";
+            return `<span class="${color}">${c}</span>`;
+          }).join("")}
+        </div>
+
+        ${!isFinished ? `
+          <textarea oninput="handleTyping(event)"
+            class="w-full p-6 rounded-xl bg-gray-800 text-2xl border-2 border-purple-500"
+            placeholder="Start typing...">${userInput}</textarea>
+        ` : `
+          <div class="bg-gray-800 p-6 rounded-3xl text-center">
+            <div class="text-4xl">WPM: ${wpm}</div>
+            <div>Accuracy: ${accuracy}%</div>
+            <div>Errors: ${errors}</div>
+            <button onclick="resetTyping(); render()" class="mt-4 w-full py-3 bg-purple-600 rounded-xl">
+              Try Again
+            </button>
+          </div>
+        `}
+
+        <button onclick="backToMenu()" class="mt-6 px-6 py-3 bg-gray-700 rounded-xl">
+          🔙 Back
+        </button>
+      </div>
     </div>
-  );
+  `;
 }
+
+/* ===================== INIT ===================== */
+randomSentence();
+render();
+</script>
+</body>
+</html>
