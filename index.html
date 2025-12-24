@@ -661,6 +661,10 @@ function getPlayerName() {
 }
 
 /* ================= TYPING TEST ================= */
+function sanitizeLTR(text) {
+  return text.replace(/[\u200E\u200F\u202A-\u202E\u2066-\u2069]/g, "");
+}
+  
 function handleTyping(e) {
   if (isFinished) return;
   
@@ -673,7 +677,7 @@ function handleTyping(e) {
     }, 100);
   }
   
-  userInput = e.target.value;
+userInput = sanitizeLTR(e.target.value);
   
   if (userInput === currentSentence) {
     finishTyping();
