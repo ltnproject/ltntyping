@@ -15,10 +15,14 @@
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%);
+      background: linear-gradient(135deg, #0a3d0a 0%, #8b0000 50%, #0a3d0a 100%);
       color: white;
       overflow-x: hidden;
       min-height: 100vh;
+      user-select: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
     }
 
     /* Snowfall Animation */
@@ -46,28 +50,28 @@
       top: 0;
       left: 0;
       right: 0;
-      height: 40px;
+      height: 50px;
       display: flex;
       justify-content: space-around;
+      align-items: center;
       z-index: 999;
+      background: linear-gradient(180deg, rgba(0,0,0,0.3) 0%, transparent 100%);
     }
 
     .light {
-      width: 10px;
-      height: 10px;
+      width: 15px;
+      height: 15px;
       border-radius: 50%;
       animation: blink 1s infinite;
+      box-shadow: 0 0 30px currentColor;
     }
 
-    .light:nth-child(1) { background: #ff0000; animation-delay: 0s; }
-    .light:nth-child(2) { background: #00ff00; animation-delay: 0.2s; }
-    .light:nth-child(3) { background: #0000ff; animation-delay: 0.4s; }
-    .light:nth-child(4) { background: #ffff00; animation-delay: 0.6s; }
-    .light:nth-child(5) { background: #ff00ff; animation-delay: 0.8s; }
+    .light:nth-child(odd) { background: #ff0000; animation-delay: 0s; }
+    .light:nth-child(even) { background: #00ff00; animation-delay: 0.5s; }
 
     @keyframes blink {
-      0%, 100% { opacity: 1; box-shadow: 0 0 20px currentColor; }
-      50% { opacity: 0.3; }
+      0%, 100% { opacity: 1; box-shadow: 0 0 40px currentColor; transform: scale(1); }
+      50% { opacity: 0.4; box-shadow: 0 0 10px currentColor; transform: scale(0.8); }
     }
 
     /* Container */
@@ -94,11 +98,18 @@
       font-weight: bold;
       text-align: center;
       margin-bottom: 60px;
-      text-shadow: 0 0 20px rgba(167, 139, 250, 0.5);
-      background: linear-gradient(45deg, #a78bfa, #ec4899, #f59e0b);
+      text-shadow: 0 0 30px rgba(255, 0, 0, 0.8);
+      background: linear-gradient(45deg, #ff0000, #00ff00, #ffd700, #ff0000);
+      background-size: 200% 200%;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
+      animation: christmasGlow 3s ease infinite;
+    }
+
+    @keyframes christmasGlow {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
     }
 
     .cards-grid {
@@ -110,20 +121,22 @@
     }
 
     .card {
-      background: rgba(30, 27, 75, 0.6);
+      background: linear-gradient(135deg, rgba(139, 0, 0, 0.3), rgba(0, 100, 0, 0.3));
       backdrop-filter: blur(10px);
-      border: 2px solid rgba(167, 139, 250, 0.3);
+      border: 3px solid #ffd700;
       border-radius: 20px;
       padding: 40px;
       cursor: pointer;
       transition: all 0.3s ease;
       text-align: center;
+      box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
     }
 
     .card:hover {
       transform: translateY(-10px) scale(1.05);
-      border-color: rgba(167, 139, 250, 0.8);
-      box-shadow: 0 20px 60px rgba(167, 139, 250, 0.4);
+      border-color: #ff0000;
+      box-shadow: 0 20px 60px rgba(255, 0, 0, 0.6), 0 0 50px rgba(0, 255, 0, 0.4);
+      background: linear-gradient(135deg, rgba(139, 0, 0, 0.5), rgba(0, 100, 0, 0.5));
     }
 
     .card-icon {
@@ -135,6 +148,71 @@
     .card-title {
       font-size: 1.8rem;
       font-weight: bold;
+    }
+
+    /* Mini Leaderboard */
+    .mini-leaderboard {
+      background: linear-gradient(135deg, rgba(139, 0, 0, 0.4), rgba(0, 100, 0, 0.4));
+      backdrop-filter: blur(10px);
+      border: 3px solid #ffd700;
+      border-radius: 20px;
+      padding: 30px;
+      max-width: 600px;
+      margin: 0 auto 40px;
+      box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+    }
+
+    .mini-leaderboard-title {
+      font-size: 2rem;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 20px;
+      color: #ffd700;
+      text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+    }
+
+    .mini-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 15px;
+      margin-bottom: 8px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 10px;
+      font-size: 0.95rem;
+    }
+
+    .mini-item.rank-1 {
+      border-left: 3px solid #ffd700;
+      background: rgba(255, 215, 0, 0.15);
+    }
+
+    .mini-item.rank-2 {
+      border-left: 3px solid #c0c0c0;
+      background: rgba(192, 192, 192, 0.15);
+    }
+
+    .mini-item.rank-3 {
+      border-left: 3px solid #cd7f32;
+      background: rgba(205, 127, 50, 0.15);
+    }
+
+    .expand-btn {
+      width: 100%;
+      padding: 12px;
+      background: rgba(255, 215, 0, 0.2);
+      border: 2px solid #ffd700;
+      border-radius: 10px;
+      color: #ffd700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 10px;
+    }
+
+    .expand-btn:hover {
+      background: rgba(255, 215, 0, 0.3);
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
     }
 
     /* Typing Test */
@@ -165,6 +243,10 @@
       margin-bottom: 30px;
       font-family: 'Courier New', monospace;
       min-height: 120px;
+      user-select: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
     }
 
     .char-correct { color: #10b981; }
@@ -207,8 +289,8 @@
     .wpm-display {
       font-size: 5rem;
       font-weight: bold;
-      color: #a78bfa;
-      text-shadow: 0 0 30px rgba(167, 139, 250, 0.6);
+      color: #ff0000;
+      text-shadow: 0 0 40px rgba(255, 0, 0, 0.8), 0 0 20px rgba(0, 255, 0, 0.5);
       margin-bottom: 20px;
     }
 
@@ -370,14 +452,14 @@
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, #a78bfa, #ec4899);
+      background: linear-gradient(135deg, #ff0000, #00ff00);
       color: white;
-      box-shadow: 0 10px 30px rgba(167, 139, 250, 0.4);
+      box-shadow: 0 10px 30px rgba(255, 0, 0, 0.4);
     }
 
     .btn-primary:hover {
       transform: translateY(-3px);
-      box-shadow: 0 15px 40px rgba(167, 139, 250, 0.6);
+      box-shadow: 0 15px 40px rgba(255, 0, 0, 0.6), 0 0 30px rgba(0, 255, 0, 0.5);
     }
 
     .btn-secondary {
@@ -431,6 +513,21 @@
 
 <body>
 <div class="lights">
+  <div class="light"></div>
+  <div class="light"></div>
+  <div class="light"></div>
+  <div class="light"></div>
+  <div class="light"></div>
+  <div class="light"></div>
+  <div class="light"></div>
+  <div class="light"></div>
+  <div class="light"></div>
+  <div class="light"></div>
+  <div class="light"></div>
+  <div class="light"></div>
+  <div class="light"></div>
+  <div class="light"></div>
+  <div class="light"></div>
   <div class="light"></div>
   <div class="light"></div>
   <div class="light"></div>
@@ -528,6 +625,7 @@ let clickTimer = null;
 // Leaderboard
 let leaderboardData = [];
 let leaderboardLoading = false;
+let showFullLeaderboard = false;
 
 /* ================= HELPERS ================= */
 function randomSentence() {
@@ -603,6 +701,9 @@ function finishTyping() {
     wpm: wpm,
     accuracy: accuracy,
     timestamp: Date.now()
+  }).then(() => {
+    console.log("Score saved to leaderboard!");
+    loadLeaderboard();
   }).catch(err => {
     console.error("Error saving to leaderboard:", err);
   });
@@ -617,14 +718,13 @@ function startClickTest() {
   clickStart = Date.now();
   
   clickTimer = setInterval(() => {
+    const elapsed = (Date.now() - clickStart) / 1000;
+    if (elapsed >= clickTime) {
+      clickRunning = false;
+      if (clickTimer) clearInterval(clickTimer);
+    }
     render();
-  }, 100);
-
-  setTimeout(() => {
-    clickRunning = false;
-    if (clickTimer) clearInterval(clickTimer);
-    render();
-  }, clickTime * 1000);
+  }, 50);
   
   render();
 }
@@ -632,7 +732,6 @@ function startClickTest() {
 function registerClick() {
   if (clickRunning) {
     clicks++;
-    render();
   }
 }
 
@@ -643,7 +742,7 @@ function loadLeaderboard() {
   
   db.collection("leaderboard")
     .orderBy("wpm", "desc")
-    .limit(10)
+    .limit(20)
     .get()
     .then(snapshot => {
       leaderboardData = snapshot.docs.map(d => d.data());
@@ -664,9 +763,40 @@ function render() {
 
   /* ===== MENU ===== */
   if (mode === "menu") {
+    const topPlayers = leaderboardData.slice(0, 5);
+    
     app.innerHTML = `
       <div class="menu-container">
         <h1 class="title">🎄 Type Master Pro 🎄</h1>
+        
+        ${!leaderboardLoading && topPlayers.length > 0 ? `
+          <div class="mini-leaderboard">
+            <div class="mini-leaderboard-title">🏆 Top 5 Champions 🏆</div>
+            ${topPlayers.map((player, i) => `
+              <div class="mini-item rank-${i + 1 <= 3 ? i + 1 : ''}">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <span style="font-weight: bold; min-width: 30px;">#${i + 1}</span>
+                  <span>${player.name}</span>
+                </div>
+                <div style="text-align: right;">
+                  <div style="font-weight: bold; color: #ffd700;">${player.wpm} WPM</div>
+                  <div style="font-size: 0.85rem; color: #9ca3af;">${player.accuracy}% acc</div>
+                </div>
+              </div>
+            `).join("")}
+            <button class="expand-btn" onclick="mode='leaderboard';render()">
+              📊 View Full Leaderboard
+            </button>
+          </div>
+        ` : leaderboardLoading ? `
+          <div class="mini-leaderboard">
+            <div class="loading">
+              <div class="spinner"></div>
+              <div style="margin-top: 10px; font-size: 1rem;">Loading champions...</div>
+            </div>
+          </div>
+        ` : ''}
+        
         <div class="cards-grid">
           <div class="card" onclick="mode='typing';resetTyping();render()">
             <div class="card-icon">⌨️</div>
@@ -680,10 +810,10 @@ function render() {
             <p style="margin-top: 10px; color: #9ca3af;">How fast can you click?</p>
           </div>
 
-          <div class="card" onclick="mode='leaderboard';loadLeaderboard()">
+          <div class="card" onclick="mode='leaderboard';render()">
             <div class="card-icon">🏆</div>
             <div class="card-title">Leaderboard</div>
-            <p style="margin-top: 10px; color: #9ca3af;">See the top performers worldwide</p>
+            <p style="margin-top: 10px; color: #9ca3af;">See all top performers worldwide</p>
           </div>
         </div>
 
@@ -839,6 +969,7 @@ function render() {
 /* ================= INIT ================= */
 createSnowflakes();
 randomSentence();
+loadLeaderboard();
 render();
 </script>
 </body>
