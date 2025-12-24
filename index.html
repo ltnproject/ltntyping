@@ -684,9 +684,10 @@ function handleTyping(e) {
   
 userInput = sanitizeLTR(e.target.value);
   
-  if (userInput === currentSentence) {
-    finishTyping();
-  }
+if (userInput.length >= currentSentence.length) {
+  finishTyping();
+}
+
   
   render();
 }
