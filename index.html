@@ -856,8 +856,13 @@ function render() {
                 class="typing-input" 
                 placeholder="Start typing here..." 
                 rows="4"
+                  oninput="handleTyping(event)"
+                  dir="ltr"
+                  spellcheck="false"
+                  autocorrect="off"
+                  autocomplete="off"
                 oninput="handleTyping(event)"
-                autofocus>${userInput}</textarea>
+                autofocus></textarea>
               
               ${isActive ? `
                 <div class="stats-bar">
@@ -884,12 +889,15 @@ function render() {
         </div>
       </div>`;
     
-    if (!isFinished) {
-      setTimeout(() => {
-        const input = document.getElementById('typeInput');
-        if (input) input.focus();
-      }, 0);
+ if (!isFinished) {
+  setTimeout(() => {
+    const input = document.getElementById('typeInput');
+    if (input) {
+      input.value = userInput;
+      input.focus();
     }
+  }, 0);
+} 
     return;
   }
 
